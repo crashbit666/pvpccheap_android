@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:pvpccheap/services/api_client.dart';
+import 'package:pvpccheap/device.dart';
 
 class DevicesScreen extends StatefulWidget {
   final String token;
 
-  const DevicesScreen({super.key, required this.token});
+  const DevicesScreen({Key? key, required this.token}) : super(key: key);
 
   @override
   DevicesScreenState createState() => DevicesScreenState();
 }
 
 class DevicesScreenState extends State<DevicesScreen> {
-  late Future<List<dynamic>> futureDevices;
+  late Future<List<Device>> futureDevices;
 
   @override
   void initState() {
@@ -22,30 +23,27 @@ class DevicesScreenState extends State<DevicesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Devices'),
-      ),
-      body: FutureBuilder<List<dynamic>>(
-        future: futureDevices,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(snapshot.data![index]['name']),  // Asume que cada dispositivo tiene una propiedad 'name'
-                );
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
+    return FutureBuilder<List<Device>>(
+      future: futureDevices,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          var devices = snapshot.data!;
+          return ListView.builder(
+            itemCount: devices.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(devices[index].name),
+                subtitle: Text(devices[index].description),
+              );
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text("${snapshot.error}"));
+        }
 
-          // Por defecto, muestra un spinner de carga.
-          return const CircularProgressIndicator();
-        },
-      ),
+        // By default, show a loading spinner.
+        return const CircularProgressIndicator();
+      },
     );
   }
 }

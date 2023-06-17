@@ -1,41 +1,27 @@
 import 'package:flutter/material.dart';
-import 'devices_screen.dart';
-import 'services/api_client.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'My App',
-      home: LoginScreen(),
-    );
-  }
-}
+import 'package:pvpccheap/services/api_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final void Function(String) onLogin;
+
+  const LoginScreen({Key? key, required this.onLogin}) : super(key: key);
 
   @override
   LoginScreenState createState() => LoginScreenState();
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool _isLoading = false;
+  String _errorMessage = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
       body: Form(
         key: _formKey,
         child: Column(
@@ -43,58 +29,67 @@ class LoginScreenState extends State<LoginScreen> {
             TextFormField(
               controller: _usernameController,
               decoration: const InputDecoration(
-                hintText: 'Enter your username',
+                labelText: 'Username',
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your username';
+                  return 'Insert your username';
                 }
                 return null;
               },
             ),
             TextFormField(
               controller: _passwordController,
-              decoration: const InputDecoration(
-                hintText: 'Enter your password',
-              ),
               obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
+                  return 'Please, insert your password';
                 }
                 return null;
               },
             ),
             ElevatedButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  // If the form is valid, display a Snackbar and login.
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Logging in...')),
-                  );
-                  var apiClient = ApiClient(baseUrl: 'http://127.0.0.1:5000');
-                  try {
-                    var token = await apiClient.login(_usernameController.text, _passwordController.text);
-                    // Navigate to devices screen with the token
-                    if (mounted) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) =>
-                            DevicesScreen(token: token)),
-                      );
-                    }
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Login failed: $e')),
-                    );
-                  }
-                }
-              },
-              child: const Text('Login'),
+              onPressed: _login,
+              child: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text('Login'),
             ),
+            Text(_errorMessage),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _login() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
+      var apiClient = ApiClient(baseUrl: 'http://127.0.0.1:5000');
+      try {
+        String token = await apiClient.login(
+          _usernameController.text,
+          _passwordController.text,
+        );
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('username',
+            _usernameController.text); // Save username
+        widget.onLogin(token);
+      } catch (e) {
+        setState(() {
+          _errorMessage = 'Error trying to initialize session: $e';
+        });
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 }

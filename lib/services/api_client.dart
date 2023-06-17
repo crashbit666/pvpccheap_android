@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pvpccheap/device.dart';
 
 class ApiClient {
   final String baseUrl;
@@ -20,9 +21,6 @@ class ApiClient {
       var data = jsonDecode(response.body);
       String token = data['access_token'];
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('jwt_token', token);
-
       return token;
     } else {
       throw Exception('Failed to login');
@@ -34,26 +32,19 @@ class ApiClient {
     return prefs.getString('jwt_token');
   }
 
-  Future<List<dynamic>> getDevices(String token) async {
-    String? token = await getToken();
-
-    if (token == null) {
-      throw Exception('Token is null');
-    }
-
+  Future<List<Device>> getDevices(String token) async {
     final response = await http.get(
-      Uri.parse(baseUrl + devicesEndpoint),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token"
+      Uri.parse('$baseUrl/api/devices'),
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
       },
     );
 
     if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-      return data;
+      List jsonResponse = json.decode(response.body);
+      return jsonResponse.map((item) => Device.fromJson(item)).toList();
     } else {
-      throw Exception('Failed to get devices');
+      throw Exception('Failed to load devices');
     }
   }
 }
