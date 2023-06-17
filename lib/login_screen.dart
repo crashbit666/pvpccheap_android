@@ -22,43 +22,59 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: <Widget>[
-            TextFormField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Insert your username';
-                }
-                return null;
-              },
+      body: Center(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('Login', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Username',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Insert your username';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Insert your password';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                    textStyle: const TextStyle(fontSize: 20),
+                  ),
+                  onPressed: _login,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Login'),
+                ),
+                Text(_errorMessage, style: const TextStyle(color: Colors.red)),
+              ],
             ),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please, insert your password';
-                }
-                return null;
-              },
-            ),
-            ElevatedButton(
-              onPressed: _login,
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text('Login'),
-            ),
-            Text(_errorMessage),
-          ],
+          ),
         ),
       ),
     );
