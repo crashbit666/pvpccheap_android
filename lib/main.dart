@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'electricity_price_screen.dart';
 import 'login_screen.dart';
 import 'devices_screen.dart';
 
@@ -70,8 +71,14 @@ class MainScreenState extends State<MainScreen> {
         } else {
           return const Center(child: Text("Please login first to see devices"));
         }
+      case 2:
+        if (token != null && token!.isNotEmpty) {
+          return ElectricityPriceScreen(token: token!);
+        } else {
+          return const Center(child: Text("Please login first to see electricity prices"));
+        }
       default:
-        return const Center(child: Text('Welcome'));
+        return const Center(child: Text('Select a menu option'));
     }
   }
 
@@ -82,42 +89,67 @@ class MainScreenState extends State<MainScreen> {
         title: const Text('PVPC Cheap'),
       ),
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
           children: <Widget>[
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+                  const DrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                    ),
+                    child: Text('Menu'),
+                  ),
+                  ListTile(
+                    title: const Text('Login'),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 0;
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Devices'),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 1;
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('PVPC Prices'),
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = 2;
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
               ),
-              child: Text('Menu'),
             ),
-            ListTile(
-              title: const Text('Login'),
-              onTap: () {
-                setState(() {
-                  _selectedIndex = 0;
-                });
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Devices'),
-              onTap: () {
-                setState(() {
-                  _selectedIndex = 1;
-                });
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Config'),
-              onTap: () {
-                // TODO: Navegar a la pantalla de configuración
-              },
-            ),
+            if (token != null && token!.isNotEmpty)
+              ListTile(
+                title: const Text('Logout'),
+                onTap: () {
+                  // Remove token
+                  SharedPreferences.getInstance().then((prefs) {
+                    prefs.remove('token');
+                  });
+                  setState(() {
+                    token = null;
+                    _selectedIndex = 0;  // Redirect to login page
+                  });
+                  Navigator.pop(context);
+                },
+              ),
           ],
         ),
       ),
+
       body: _getDrawerItemWidget(_selectedIndex),
     );
   }
