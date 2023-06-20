@@ -31,9 +31,13 @@ class DevicesScreenState extends State<DevicesScreen> {
           return ListView.builder(
             itemCount: devices.length,
             itemBuilder: (context, index) {
+              var sleepHours = devices[index].sleepHours.map((sh) => "${sh.hour} : Active? ${sh.isActive}").join(', ');
+              var sleepHoursWeekend = devices[index].sleepHoursWeekend.map((sh) => "${sh.hour} : Active? ${sh.isActive}").join(', ');
               return ListTile(
                 title: Text(devices[index].name),
-                subtitle: Text(devices[index].description),
+                subtitle: Text(
+                    "Protocol: ${devices[index].protocol}\n${devices[index].webhook != null ? "Webhook: ${devices[index].webhook}\n" : ""}Max Hours: ${devices[index].maxHours}\nSleep Hours: $sleepHours\nSleep Hours Weekend: $sleepHoursWeekend"
+                ),
               );
             },
           );
