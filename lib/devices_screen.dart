@@ -36,7 +36,11 @@ class DevicesScreenState extends State<DevicesScreen> {
               return ListTile(
                 title: Text(devices[index].name),
                 subtitle: Text(
-                    "Protocol: ${devices[index].protocol}\n${devices[index].webhook != null ? "Webhook: ${devices[index].webhook}\n" : ""}Max Hours: ${devices[index].maxHours}\nSleep Hours: $sleepHours\nSleep Hours Weekend: $sleepHoursWeekend"
+                    "Protocol: ${devices[index].protocol}\n"
+                        "${devices[index].webhook.isNotEmpty ? 'Webhook: ${devices[index].webhook}\n' : ''}"
+                        "Max Hours: ${devices[index].maxHours}\n"
+                        "Sleep Hours: $sleepHours\n"
+                        "Sleep Hours Weekend: $sleepHoursWeekend"
                 ),
               );
             },
