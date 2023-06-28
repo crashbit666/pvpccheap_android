@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pvpccheap/services/api_client.dart';
 import 'package:pvpccheap/device.dart';
+import 'sleep_hour_bar.dart';
 
 class DevicesScreen extends StatefulWidget {
   final String token;
@@ -31,16 +32,31 @@ class DevicesScreenState extends State<DevicesScreen> {
           return ListView.builder(
             itemCount: devices.length,
             itemBuilder: (context, index) {
-              var sleepHours = devices[index].sleepHours.map((sh) => "${sh.hour} : Active? ${sh.isActive}").join(', ');
-              var sleepHoursWeekend = devices[index].sleepHoursWeekend.map((sh) => "${sh.hour} : Active? ${sh.isActive}").join(', ');
-              return ListTile(
-                title: Text(devices[index].name),
-                subtitle: Text(
-                    "Protocol: ${devices[index].protocol}\n"
-                        "${devices[index].webhook.isNotEmpty ? 'Webhook: ${devices[index].webhook}\n' : ''}"
-                        "Max Hours: ${devices[index].maxHours}\n"
-                        "Sleep Hours: $sleepHours\n"
-                        "Sleep Hours Weekend: $sleepHoursWeekend"
+              return Card( // Wrap each ListTile with a Card
+                margin: const EdgeInsets.all(20.0), // Increase margin around each card
+                elevation: 8, // Increase elevation for more pronounced shadow
+                child: ListTile(
+                  title: Text(devices[index].name),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          "Protocol: ${devices[index].protocol}\n"
+                              "${devices[index].webhook.isNotEmpty ? 'Webhook: ${devices[index].webhook}\n' : ''}"
+                              "Max Hours: ${devices[index].maxHours}\n"
+                      ),
+                      const Text('Active Hours:'),
+                      SleepHourBar(
+                        sleepHours: devices[index].sleepHours,
+                        activeColor: Colors.green,
+                      ),
+                      const Text('Active Hours Weekend:'),
+                      SleepHourBar(
+                        sleepHours: devices[index].sleepHoursWeekend,
+                        activeColor: Colors.green,
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
