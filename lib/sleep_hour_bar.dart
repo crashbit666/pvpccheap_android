@@ -18,13 +18,13 @@ class SleepHourBar extends StatelessWidget {
         final isActive = sleepHours.any((sh) => sh.hour == index);
         return Expanded(
           child: Container(
-            height: 40, // Aumenté la altura para hacer espacio para el texto
+            height: 40,
             color: isActive ? activeColor : Colors.grey,
             child: Center(
               child: Text(
                 '$index',
                 style: TextStyle(
-                  color: isActive ? Colors.white : Colors.black, // color del texto dependiendo de si la barra está activa o no
+                  color: isActive ? Colors.white : Colors.black, // Text color change depending if hour is active
                 ),
               ),
             ),

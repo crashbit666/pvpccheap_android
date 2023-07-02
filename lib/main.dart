@@ -8,20 +8,46 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.light;
+
+  void toggleTheme() {
+    setState(() {
+      if (_themeMode == ThemeMode.light) {
+        _themeMode = ThemeMode.dark;
+      } else {
+        _themeMode = ThemeMode.light;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'PVPC Cheap',
-      home: MainScreen(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+      ),
+      themeMode: _themeMode,
+      home: MainScreen(toggleTheme: toggleTheme),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final VoidCallback toggleTheme;
+  const MainScreen({required this.toggleTheme, Key? key}) : super(key: key);
 
   @override
   MainScreenState createState() => MainScreenState();
@@ -128,6 +154,13 @@ class MainScreenState extends State<MainScreen> {
                       Navigator.pop(context);
                     },
                   ),
+                  ListTile(
+                    title: const Text('Toggle Theme'),
+                    onTap: () {
+                      widget.toggleTheme();
+                      Navigator.pop(context);
+                    },
+                  ),
                 ],
               ),
             ),
@@ -149,7 +182,6 @@ class MainScreenState extends State<MainScreen> {
           ],
         ),
       ),
-
       body: _getDrawerItemWidget(_selectedIndex),
     );
   }

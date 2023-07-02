@@ -13,6 +13,7 @@ class ElectricityPriceScreen extends StatefulWidget {
 
 class ElectricityPriceScreenState extends State<ElectricityPriceScreen> {
   late Future<List<HourPrice>> futureHourPrice;
+  late List<HourPrice> sortedData;
 
   @override
   void initState() {
@@ -47,24 +48,53 @@ class ElectricityPriceScreenState extends State<ElectricityPriceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<HourPrice>>(
-      future: futureHourPrice,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(snapshot.data![index].hour),
-                subtitle: Text('${snapshot.data![index].price}'),
-              );
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Electricity Prices'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.lock_clock),
+            onPressed: () {
+              setState(() {
+                sortedData.sort((a, b) => int.parse(a.hour).compareTo(int.parse(b.hour)));
+              });
             },
-          );
-        } else if (snapshot.hasError) {
-          return Center(child: Text("${snapshot.error}"));
-        }
-        return const CircularProgressIndicator();
-      },
+            tooltip: 'Sort by Hour',
+          ),
+          IconButton(
+            icon: const Icon(Icons.euro_symbol),
+            onPressed: () {
+              setState(() {
+                sortedData.sort((a, b) => a.price.compareTo(b.price));
+              });
+            },
+            tooltip: 'Sort by Price',
+          ),
+        ],
+      ),
+      body: FutureBuilder<List<HourPrice>>(
+        future: futureHourPrice,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            sortedData = snapshot.data!;
+            return ListView.builder(
+              itemCount: sortedData.length,
+              itemBuilder: (context, index) {
+                final hourPrice = sortedData[index];
+                return Card(
+                  child: ListTile(
+                    leading: Text(hourPrice.hour, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    title: Text(hourPrice.price.toStringAsFixed(4)),
+                  ),
+                );
+              },
+            );
+          } else if (snapshot.hasError) {
+            return Center(child: Text("${snapshot.error}"));
+          }
+          return const CircularProgressIndicator();
+        },
+      ),
     );
   }
 }
